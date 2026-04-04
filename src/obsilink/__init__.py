@@ -1,5 +1,5 @@
 """Public package API for obsilink."""
 
-from .parser import Link, extract_obsidian_links
+from .parser import Link, LinkType, extract_links
 
-__all__ = ["Link", "extract_obsidian_links"]
+__all__ = ["Link", "LinkType", "extract_links"]

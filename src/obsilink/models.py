@@ -36,6 +36,11 @@ class Link:
         )
 
     @property
+    def is_file(self) -> bool:
+        """Check if the target is a file path."""
+        return not self.is_url
+
+    @property
     def as_path(self) -> Path:
         """Return the target as a Path object.
 

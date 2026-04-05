@@ -11,7 +11,6 @@ from typing import Protocol
 
 from .models import Link, LinkType
 
-
 _WIKILINK_PATTERN = re.compile(r"(!?)\[\[([^\[\]\r\n]+?)\]\]")
 _MARKDOWN_LINK_PATTERN = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
 _PLAIN_URL_PATTERN = re.compile(
@@ -140,14 +139,11 @@ def extract_links(source: str | TextReadable) -> list[Link]:
     """
 
     text = _source_to_text(source)
-    matches: list[_MatchWithSource] = []
-
-    for m in _WIKILINK_PATTERN.finditer(text):
-        matches.append(_MatchWithSource(m, "wikilink"))
-    for m in _MARKDOWN_LINK_PATTERN.finditer(text):
-        matches.append(_MatchWithSource(m, "markdown"))
-    for m in _PLAIN_URL_PATTERN.finditer(text):
-        matches.append(_MatchWithSource(m, "plain_url"))
+    matches: list[_MatchWithSource] = [
+        *(_MatchWithSource(m, "wikilink") for m in _WIKILINK_PATTERN.finditer(text)),
+        *(_MatchWithSource(m, "markdown") for m in _MARKDOWN_LINK_PATTERN.finditer(text)),
+        *(_MatchWithSource(m, "plain_url") for m in _PLAIN_URL_PATTERN.finditer(text)),
+    ]
 
     matches.sort(key=lambda x: x.start)
 

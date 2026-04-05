@@ -4,6 +4,8 @@ dynamic = ["version"]
 description = "Extract Obsidian-style wikilink targets from text"
 readme = "README.md"
 requires-python = ">=3.12"
+
+keywords = ["obsidian", "wikilink", "parser", "text-processing", "markdown"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -15,13 +17,20 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Processing",
 ]
-keywords = ["obsidian", "wikilink", "parser", "text-processing", "markdown"]
+
 dependencies = []
+license = {file = "LICENSE"}
+authors = [
+    {name = "Christian Gröling", email = "contact@christiangroeling.de"}
+]
+
+
 
 [project.urls]
 Homepage = "https://github.com/chgroeling/obsilink"
 Repository = "https://github.com/chgroeling/obsilink"
 Issues = "https://github.com/chgroeling/obsilink/issues"
+
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -43,12 +52,64 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "S",     # flake8-bandit (security issues)
+    "PERF",  # perflint (performance anti-patterns)
+    "LOG",   # flake8-logging (logging-specific issues)
+    "BLE",   # flake8-blind-except (prevents catch-all except: clauses)
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort (import sorting)
+    "B",     # flake8-bugbear (common design flaws and bugs)
+    "C4",    # flake8-comprehensions
+    "UP",    # pyupgrade (upgrades syntax to modern Python)
+    "ARG",   # flake8-unused-arguments
+    "SIM",   # flake8-simplify (reduces code complexity)
+    "TCH",   # flake8-type-checking (manages type-checking imports)
+    "PTH",   # flake8-use-pathlib (enforces modern path handling)
+    "ASYNC", # flake8-async (asyncio-specific best practices)
+    "FLY",   # flynt (converts static strings to f-strings)
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "S101",  # allow pytest assertions in tests
+]
+
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
-mypy_path = ["src"]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
 testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+    "--verbose",
+]

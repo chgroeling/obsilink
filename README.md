@@ -1,9 +1,9 @@
 # obsilink
 
-[![Python version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)
 [![PyPI](https://img.shields.io/pypi/v/obsilink.svg)](https://pypi.org/project/obsilink/)
-
 
 `obsilink` is a small, deterministic Python library for extracting links from Markdown text.
 

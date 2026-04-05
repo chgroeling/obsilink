@@ -1,4 +1,4 @@
-"""Public package API for obsilink."""
+"""Public API for extracting links from Obsidian and Markdown text."""
 
 from .models import Link, LinkType
 from .parser import extract_links

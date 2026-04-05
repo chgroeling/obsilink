@@ -1,4 +1,8 @@
-"""Obsidian and Markdown links extraction utilities."""
+"""Link extraction from text sources.
+
+Supports extraction of Obsidian wikilinks (e.g., ``[[Note]]``, ``[[Note|Alias]]``),
+Markdown links, and plain URLs from input text or file-like objects.
+"""
 
 from __future__ import annotations
 

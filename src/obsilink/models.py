@@ -1,4 +1,4 @@
-"""Data models for parsed links."""
+"""Data models for parsed Obsidian and Markdown links."""
 
 from __future__ import annotations
 

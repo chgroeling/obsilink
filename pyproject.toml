@@ -3,8 +3,25 @@ name = "obsilink"
 version = "0.1.0"
 description = "Extract Obsidian-style wikilink targets from text"
 readme = "AGENTS.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Text Processing",
+]
+keywords = ["obsidian", "wikilink", "parser", "text-processing", "markdown"]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/chgroeling/obsilink"
+Repository = "https://github.com/chgroeling/obsilink"
+Issues = "https://github.com/chgroeling/obsilink/issues"
 
 [build-system]
 requires = ["hatchling>=1.24.0"]

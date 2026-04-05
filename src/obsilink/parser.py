@@ -126,16 +126,36 @@ def _parse_plain_url(match: re.Match[str]) -> Link:
 
 
 def extract_links(source: str | TextReadable) -> list[Link]:
-    """Extract Obsidian wikilinks and Markdown links from text.
+    """Extract Obsidian wikilinks, Markdown links, and plain URLs from text.
+
+    Parses the input source and returns structured ``Link`` objects for each
+    match found. Supports:
+
+    - Obsidian wikilinks: ``[[Note]]``, ``[[Note|Alias]]``, ``[[Note#Heading]]``, ``[[Note^block]]``
+    - Wikilink embeds: ``![[Note]]``
+    - Markdown links: ``[text](url)``
+    - Markdown embeds: ``![alt](url)``
+    - Plain URLs: standalone ``https://``, ``http://``, ``ftp://``, ``file://``, and ``mailto:`` links
+
+    Links are returned in encounter order. Duplicates are preserved. Malformed
+    or partial syntax is silently ignored. Embed targets (``![[...]]`` and
+    ``![...](...)``) are included by default.
+
+    Each ``Link`` is split into its constituent parts — the ``target`` field
+    contains only the note/path/URL, while heading (``#``) and block-id (``^``)
+    fragments are extracted into separate fields.
 
     Args:
-        source: Raw text or a text file-like object with ``.read()``.
+        source: Raw text (``str``) or a text file-like object with a ``.read()``
+            method that returns ``str``.
 
     Returns:
-        list[Link]: Parsed links in encounter order.
+        A list of ``Link`` objects in the order they appear in the source.
 
     Raises:
-        TypeError: If source is unsupported or ``.read()`` does not return ``str``.
+        TypeError: If ``source`` is not a ``str`` or a file-like object with
+            a callable ``.read()`` method.
+        TypeError: If ``.read()`` does not return a ``str``.
     """
 
     text = _source_to_text(source)

@@ -20,7 +20,20 @@ class LinkType(Enum):
 
 @dataclass(frozen=True, slots=True)
 class Link:
-    """Structured representation of a parsed link."""
+    """Structured representation of a parsed link.
+
+    Links are split into their constituent parts. The ``target`` field
+    contains only the note or path portion — heading (``#``) and block-id
+    (``^``) fragments are extracted into their own fields and are **not**
+    included in ``target``.
+
+    Attributes:
+        type: The kind of link (wikilink, embed, markdown, plain URL).
+        target: The note name, file path, or URL without heading or block-id fragments.
+        alias: Display text (e.g. ``[[Note|Alias]]`` → ``"Alias"``). ``None`` if not provided.
+        heading: The heading fragment after ``#`` (e.g. ``[[Note#Section]]`` → ``"Section"``). ``None`` if absent.
+        blockid: The block-id fragment after ``^`` (e.g. ``[[Note^abc123]]`` → ``"abc123"``). ``None`` if absent.
+    """
 
     type: LinkType
     target: str

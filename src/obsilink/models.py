@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 
 
 class LinkType(Enum):
@@ -24,3 +26,20 @@ class Link:
     alias: str | None
     heading: str | None
     blockid: str | None
+
+    @property
+    def is_url(self) -> bool:
+        """Check if the target is a URL."""
+        return bool(re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", self.target))
+
+    @property
+    def as_path(self) -> Path:
+        """Return the target as a Path object.
+
+        Raises:
+            ValueError: If the target is a URL.
+        """
+        if self.is_url:
+            msg = f"Cannot convert URL target to Path: {self.target!r}"
+            raise ValueError(msg)
+        return Path(self.target)

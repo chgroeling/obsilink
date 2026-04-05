@@ -10,6 +10,9 @@ from .models import Link, LinkType
 
 _WIKILINK_PATTERN = re.compile(r"(!?)\[\[([^\[\]\r\n]+?)\]\]")
 _MARKDOWN_LINK_PATTERN = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
+_PLAIN_URL_PATTERN = re.compile(
+    r"https?://[^\s\]\)>\"']+|ftp://[^\s\]\)>\"']+|mailto:[^\s\]\)>\"']+"
+)
 
 
 class TextReadable(Protocol):
@@ -108,6 +111,17 @@ def _parse_markdown_link(match: re.Match[str]) -> Link:
     )
 
 
+def _parse_plain_url(match: re.Match[str]) -> Link:
+    url = match.group(0)
+    return Link(
+        type=LinkType.PLAIN_URL,
+        target=url,
+        alias=None,
+        heading=None,
+        blockid=None,
+    )
+
+
 def extract_links(source: str | TextReadable) -> list[Link]:
     """Extract Obsidian wikilinks and Markdown links from text.
 
@@ -128,16 +142,29 @@ def extract_links(source: str | TextReadable) -> list[Link]:
         matches.append(_MatchWithSource(m, "wikilink"))
     for m in _MARKDOWN_LINK_PATTERN.finditer(text):
         matches.append(_MatchWithSource(m, "markdown"))
+    for m in _PLAIN_URL_PATTERN.finditer(text):
+        matches.append(_MatchWithSource(m, "plain_url"))
 
     matches.sort(key=lambda x: x.start)
 
     links: list[Link] = []
+    skip_ranges: list[tuple[int, int]] = []
+
     for item in matches:
-        if item.source == "wikilink":
-            link = _parse_wikilink(item.match)
+        start, end = item.match.start(), item.match.end()
+        for skip_start, skip_end in skip_ranges:
+            if skip_start <= start < skip_end:
+                break
         else:
-            link = _parse_markdown_link(item.match)
-        if link is not None:
-            links.append(link)
+            if item.source == "wikilink":
+                link = _parse_wikilink(item.match)
+            elif item.source == "markdown":
+                link = _parse_markdown_link(item.match)
+            else:
+                link = _parse_plain_url(item.match)
+            if link is not None:
+                links.append(link)
+                if item.source in ("wikilink", "markdown"):
+                    skip_ranges.append((start, end))
 
     return links

@@ -15,6 +15,7 @@ class LinkType(Enum):
     WIKILINK_EMBED = "wikilink_embed"
     MARKDOWN_LINK = "markdown_link"
     MARKDOWN_EMBED = "markdown_embed"
+    PLAIN_URL = "plain_url"
 
 
 @dataclass(frozen=True, slots=True)

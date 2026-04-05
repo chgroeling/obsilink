@@ -254,3 +254,80 @@ def test_markdown_links_from_file_like_input() -> None:
             type=LinkType.MARKDOWN_EMBED, target="img.png", alias="Img", heading=None, blockid=None
         ),
     ]
+
+
+def test_extracts_plain_urls() -> None:
+    text = "Visit https://example.com or see ftp://files.example.com"
+    assert extract_links(text) == [
+        Link(
+            type=LinkType.PLAIN_URL,
+            target="https://example.com",
+            alias=None,
+            heading=None,
+            blockid=None,
+        ),
+        Link(
+            type=LinkType.PLAIN_URL,
+            target="ftp://files.example.com",
+            alias=None,
+            heading=None,
+            blockid=None,
+        ),
+    ]
+
+
+def test_extracts_plain_url_with_path() -> None:
+    text = "Check https://example.com/path/to/page for details"
+    assert extract_links(text) == [
+        Link(
+            type=LinkType.PLAIN_URL,
+            target="https://example.com/path/to/page",
+            alias=None,
+            heading=None,
+            blockid=None,
+        ),
+    ]
+
+
+def test_plain_urls_preserved_in_mixed_order() -> None:
+    text = "[[Note]] https://url.com [Link](https://link.com)"
+    result = extract_links(text)
+    assert len(result) == 3
+    assert result[0].type == LinkType.WIKILINK
+    assert result[1].type == LinkType.PLAIN_URL
+    assert result[2].type == LinkType.MARKDOWN_LINK
+
+
+def test_plain_url_does_not_extract_markdown_url_in_brackets() -> None:
+    text = "[Link](https://example.com)"
+    result = extract_links(text)
+    assert len(result) == 1
+    assert result[0].type == LinkType.MARKDOWN_LINK
+
+
+def test_plain_urls_preserve_duplicates() -> None:
+    text = "https://a.com https://b.com https://a.com"
+    assert extract_links(text) == [
+        Link(
+            type=LinkType.PLAIN_URL, target="https://a.com", alias=None, heading=None, blockid=None
+        ),
+        Link(
+            type=LinkType.PLAIN_URL, target="https://b.com", alias=None, heading=None, blockid=None
+        ),
+        Link(
+            type=LinkType.PLAIN_URL, target="https://a.com", alias=None, heading=None, blockid=None
+        ),
+    ]
+
+
+def test_extracts_mailto_urls() -> None:
+    text = "Contact mailto:test@example.com for help"
+    assert extract_links(text) == [
+        Link(
+            type=LinkType.PLAIN_URL,
+            target="mailto:test@example.com",
+            alias=None,
+            heading=None,
+            blockid=None,
+        ),
+    ]

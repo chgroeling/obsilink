@@ -1,5 +1,9 @@
 # obsilink
 
+[![PyPI](https://img.shields.io/pypi/v/obsilink?logo=pypi)](https://pypi.org/project/obsilink/)
+[![Python](https://img.shields.io/pypi/pyversions/obsilink?logo=python)](https://pypi.org/project/obsilink/)
+[![License](https://img.shields.io/pypi/l/obsilink?logo=法律)](LICENSE)
+
 `obsilink` is a small, deterministic Python library for extracting links from Markdown text.
 
 It supports:

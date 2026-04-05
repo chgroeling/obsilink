@@ -134,6 +134,21 @@ Convenience properties:
 - `LinkType.MARKDOWN_EMBED`
 - `LinkType.PLAIN_URL`
 
+## How links are split
+
+Each Obsidian wikilink is split into its constituent parts. The `target` field
+contains only the note or path — heading (`#`) and block-id (`^`) fragments are
+extracted into their own fields and are **not** included in `target`.
+
+| Input | `target` | `alias` | `heading` | `blockid` |
+|---|---|---|---|---|
+| `[[Note]]` | `Note` | `None` | `None` | `None` |
+| `[[Note\|Alias]]` | `Note` | `Alias` | `None` | `None` |
+| `[[Folder/Note#Heading]]` | `Folder/Note` | `None` | `Heading` | `None` |
+| `[[Note^abc123]]` | `Note` | `None` | `None` | `abc123` |
+| `[[Note#Section^block\|Display]]` | `Note` | `Display` | `Section` | `block` |
+| `![[Embedded]]` | `Embedded` | `None` | `None` | `None` |
+
 ## Development
 
 This project uses `uv`, `ruff`, `mypy`, and `pytest`.

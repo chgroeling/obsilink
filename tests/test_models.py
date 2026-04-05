@@ -38,6 +38,16 @@ class TestLinkIsUrl:
         )
         assert link.is_url is True
 
+    def test_returns_true_for_mailto_url(self) -> None:
+        link = Link(
+            type=LinkType.PLAIN_URL,
+            target="mailto:user@example.com",
+            alias="Email",
+            heading=None,
+            blockid=None,
+        )
+        assert link.is_url is True
+
     def test_returns_false_for_wikilink_target(self) -> None:
         link = Link(
             type=LinkType.WIKILINK,

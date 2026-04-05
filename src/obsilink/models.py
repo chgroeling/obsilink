@@ -31,7 +31,9 @@ class Link:
     @property
     def is_url(self) -> bool:
         """Check if the target is a URL."""
-        return bool(re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", self.target))
+        return bool(re.match(r"^(https?|ftp|file)://", self.target)) or bool(
+            re.match(r"^mailto:", self.target)
+        )
 
     @property
     def as_path(self) -> Path:

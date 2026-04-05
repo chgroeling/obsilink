@@ -11,7 +11,7 @@ from .models import Link, LinkType
 _WIKILINK_PATTERN = re.compile(r"(!?)\[\[([^\[\]\r\n]+?)\]\]")
 _MARKDOWN_LINK_PATTERN = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
 _PLAIN_URL_PATTERN = re.compile(
-    r"https?://[^\s\]\)>\"']+|ftp://[^\s\]\)>\"']+|mailto:[^\s\]\)>\"']+"
+    r"((https?|ftp|file)://|mailto:)\b([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))"
 )
 
 

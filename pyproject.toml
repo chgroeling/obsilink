@@ -1,6 +1,6 @@
 [project]
 name = "obsilink"
-version = "0.2.0"
+dynamic = ["version"]
 description = "Extract Obsidian-style wikilink targets from text"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -24,8 +24,14 @@ Repository = "https://github.com/chgroeling/obsilink"
 Issues = "https://github.com/chgroeling/obsilink/issues"
 
 [build-system]
-requires = ["hatchling>=1.24.0"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
 
 [dependency-groups]
 dev = [

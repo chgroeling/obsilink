@@ -22,6 +22,7 @@ The parser returns structured `Link` objects in encounter order and preserves du
 - Accepts either raw `str` or file-like input with `.read()`
 - Preserves duplicates instead of deduplicating
 - Strict, typed API compatible with `mypy` strict mode
+- Links are split into structured fields (`target`, `alias`, `heading`, `blockid`) — heading (`#`) and block-id (`^`) fragments are extracted separately and never included in `target`
 
 ## Installation
 
@@ -136,9 +137,11 @@ Convenience properties:
 
 ## How links are split
 
-Each Obsidian wikilink is split into its constituent parts. The `target` field
-contains only the note or path — heading (`#`) and block-id (`^`) fragments are
+Each link is split into its constituent parts. The `target` field
+contains only the note, path, or URL — heading (`#`) and block-id (`^`) fragments are
 extracted into their own fields and are **not** included in `target`.
+
+### Obsidian wikilinks
 
 | Input | `target` | `alias` | `heading` | `blockid` |
 |---|---|---|---|---|
@@ -148,6 +151,16 @@ extracted into their own fields and are **not** included in `target`.
 | `[[Note^abc123]]` | `Note` | `None` | `None` | `abc123` |
 | `[[Note#Section^block\|Display]]` | `Note` | `Display` | `Section` | `block` |
 | `![[Embedded]]` | `Embedded` | `None` | `None` | `None` |
+
+### Markdown links
+
+For Markdown links, `heading` and `blockid` are always `None`. The `target` is the URL or path inside parentheses, and `alias` is the link text inside brackets.
+
+| Input | `target` | `alias` | `heading` | `blockid` |
+|---|---|---|---|---|
+| `[Docs](https://example.com)` | `https://example.com` | `Docs` | `None` | `None` |
+| `![Logo](assets/logo.png)` | `assets/logo.png` | `Logo` | `None` | `None` |
+| `[](relative/path.md)` | `relative/path.md` | `None` | `None` | `None` |
 
 ## Development
 

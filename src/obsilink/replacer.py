@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from .extractor import TextReadable, _source_to_text
 from .models import Link, LinkType
-from .parser import TextReadable, _source_to_text
 
 
 def _link_to_text(link: Link) -> str:

@@ -6,6 +6,7 @@ Markdown links, and plain URLs from input text or file-like objects.
 
 from __future__ import annotations
 
+import heapq
 import re
 from typing import Protocol
 
@@ -17,23 +18,17 @@ _PLAIN_URL_PATTERN = re.compile(
     r"((https?|ftp|file)://|mailto:)\b([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))"
 )
 
+# Source-type tags for fast integer comparison in the merge loop.
+_TAG_WIKILINK = 0
+_TAG_MARKDOWN = 1
+_TAG_PLAIN_URL = 2
+
 
 class TextReadable(Protocol):
     """Protocol for readable text sources."""
 
     def read(self) -> str:
         """Return full text content as a string."""
-
-
-class _MatchWithSource:
-    """Holds a regex match and its source type for unified sorting."""
-
-    __slots__ = ("start", "match", "source")
-
-    def __init__(self, match: re.Match[str], source: str) -> None:
-        self.start = match.start()
-        self.match = match
-        self.source = source
 
 
 def _source_to_text(source: str | TextReadable) -> str:
@@ -159,32 +154,30 @@ def extract_links(source: str | TextReadable) -> list[Link]:
     """
 
     text = _source_to_text(source)
-    matches: list[_MatchWithSource] = [
-        *(_MatchWithSource(m, "wikilink") for m in _WIKILINK_PATTERN.finditer(text)),
-        *(_MatchWithSource(m, "markdown") for m in _MARKDOWN_LINK_PATTERN.finditer(text)),
-        *(_MatchWithSource(m, "plain_url") for m in _PLAIN_URL_PATTERN.finditer(text)),
-    ]
 
-    matches.sort(key=lambda x: x.start)
+    # Each finditer yields matches in start-position order, so heapq.merge
+    # produces a single sorted stream in O(n) without materialising lists.
+    merged = heapq.merge(
+        ((m.start(), _TAG_WIKILINK, m) for m in _WIKILINK_PATTERN.finditer(text)),
+        ((m.start(), _TAG_MARKDOWN, m) for m in _MARKDOWN_LINK_PATTERN.finditer(text)),
+        ((m.start(), _TAG_PLAIN_URL, m) for m in _PLAIN_URL_PATTERN.finditer(text)),
+    )
 
     links: list[Link] = []
-    skip_ranges: list[tuple[int, int]] = []
+    skip_until = 0  # high-water mark: skip anything starting before this offset
 
-    for item in matches:
-        start, end = item.match.start(), item.match.end()
-        for skip_start, skip_end in skip_ranges:
-            if skip_start <= start < skip_end:
-                break
+    for start, tag, match in merged:
+        if start < skip_until:
+            continue
+        if tag == _TAG_WIKILINK:
+            link = _parse_wikilink(match)
+        elif tag == _TAG_MARKDOWN:
+            link = _parse_markdown_link(match)
         else:
-            if item.source == "wikilink":
-                link = _parse_wikilink(item.match)
-            elif item.source == "markdown":
-                link = _parse_markdown_link(item.match)
-            else:
-                link = _parse_plain_url(item.match)
-            if link is not None:
-                links.append(link)
-                if item.source in ("wikilink", "markdown"):
-                    skip_ranges.append((start, end))
+            link = _parse_plain_url(match)
+        if link is not None:
+            links.append(link)
+            if tag != _TAG_PLAIN_URL:
+                skip_until = match.end()
 
     return links

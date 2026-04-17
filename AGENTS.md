@@ -1,33 +1,39 @@
 # AGENTS.md
 
 ## Project description
-This project provides a small, deterministic Python library that extracts Obsidian-style
-wikilink targets from input text.
+This project provides a small, deterministic Python library for extracting and replacing
+links in Markdown text. It supports Obsidian wikilinks, standard Markdown links, and plain URLs.
 
 ## Core behavior
-- Parse Obsidian links such as `[[Note]]`, `[[Note|Alias]]`, and `[[Folder/Note#Heading]]`.
-- Accept input as either:
-  - `str`
-  - a text file-like object with a `.read()` method that returns `str`
-- Return `list[str]` in encounter order.
+
+### Extraction (`extract_links`)
+- Parse Obsidian wikilinks (`[[Note]]`, `[[Note|Alias]]`, `![[Embed]]`), Markdown links
+  (`[text](url)`), Markdown embeds (`![alt](path)`), and plain URLs.
+- Return structured `Link` objects (`list[Link]`) in encounter order.
 - Preserve duplicates.
-- Ignore malformed or partial wikilink syntax.
-- Include embed targets (for example `![[Note]]`) by default.
-- Raise `TypeError` for unsupported input types.
+- Ignore malformed or partial syntax.
+- Accept input as `str` or a text file-like object with `.read()` returning `str`.
+- Raise `TypeError` for unsupported input types or if `.read()` returns non-string data.
 - Propagate exceptions raised by `.read()`.
-- Raise `TypeError` if `.read()` returns non-string data.
+
+### Replacement (`replace_links`)
+- Accept a source text and a list of `(old_link, new_link)` pairs.
+- Replace the first occurrence of each old link sequentially.
+- Return the modified text and a list of booleans indicating which replacements were applied.
+- Same input type rules as extraction (`str` or file-like).
 
 ## Scope boundaries
-- This repository is extraction/parsing only.
+- This repository covers link extraction and replacement only.
 - Do not add filesystem resolution features (depth traversal, basename/path searching).
 - Do not add CLI/machine-output formatting concerns.
 - Do not rely on environment variables such as `PROJECT_DIR` in parser code.
 
 ## API guidelines
 - Keep the public API small and predictable.
-- Main entry point:
-  - `extract_obsidian_links(source: str | TextIO) -> list[str]`
-- Optional extension point (if needed): `include_embeds: bool = True`.
+- Public entry points:
+  - `extract_links(source: str | TextReadable) -> list[Link]`
+  - `replace_links(source: str | TextReadable, replacements: list[tuple[Link, Link]]) -> tuple[str, list[bool]]`
+- Core data model: `Link` (frozen dataclass) and `LinkType` (enum).
 - Validate input types and provide clear error messages.
 
 ## Non-goals

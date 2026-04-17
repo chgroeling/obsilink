@@ -5,7 +5,7 @@
 ![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)
 [![PyPI](https://img.shields.io/pypi/v/obsilink.svg)](https://pypi.org/project/obsilink/)
 
-`obsilink` is a small, deterministic Python library for extracting links from Markdown text.
+`obsilink` is a small, deterministic Python library for extracting and replacing links in Markdown text.
 
 It supports:
 
@@ -14,11 +14,12 @@ It supports:
 - Plain URLs like `https://example.com`, `ftp://files.example.com`, and `mailto:user@example.com`
 
 The parser returns structured `Link` objects in encounter order and preserves duplicates.
+Links can also be replaced in-place using structured `(old, new)` pairs.
 
 ## Features
 
 - Deterministic parsing with stable ordering
-- One public extraction function: `extract_links(...)`
+- Two public functions: `extract_links(...)` and `replace_links(...)`
 - Accepts either raw `str` or file-like input with `.read()`
 - Preserves duplicates instead of deduplicating
 - Strict, typed API compatible with `mypy` strict mode
@@ -63,6 +64,21 @@ links = extract_links(text)
 
 for link in links:
     print(link.type.value, link.target, link.alias)
+```
+
+### Replacing links
+
+```python
+from obsilink import Link, LinkType, replace_links
+
+text = "See [[OldNote]] for details."
+
+old = Link(type=LinkType.WIKILINK, target="OldNote", alias=None, heading=None, blockid=None)
+new = Link(type=LinkType.WIKILINK, target="NewNote", alias=None, heading=None, blockid=None)
+
+result_text, applied = replace_links(text, [(old, new)])
+print(result_text)   # See [[NewNote]] for details.
+print(applied)       # [True]
 ```
 
 ### More complex Obsidian wikilink example
@@ -112,6 +128,27 @@ Raises:
 - `TypeError` if `.read()` returns non-string data
 - Any exception raised by `.read()` is propagated
 
+### `replace_links(source, replacements)`
+
+Replaces links in text based on a list of `(old_link, new_link)` pairs.
+
+Accepts:
+
+- `source`: `str` or text file-like object with `.read()` returning `str`
+- `replacements`: `list[tuple[Link, Link]]`
+
+Returns:
+
+- `tuple[str, list[bool]]` — the modified text and a boolean per pair indicating whether the replacement was applied
+
+Replacements are applied sequentially; each pair replaces only the first occurrence.
+
+Raises:
+
+- `TypeError` for unsupported source types
+- `TypeError` if `.read()` returns non-string data
+- Any exception raised by `.read()` is propagated
+
 ### `Link`
 
 `Link` is a frozen dataclass with these fields:
@@ -143,24 +180,24 @@ extracted into their own fields and are **not** included in `target`.
 
 ### Obsidian wikilinks
 
-| Input | `target` | `alias` | `heading` | `blockid` |
-|---|---|---|---|---|
-| `[[Note]]` | `Note` | `None` | `None` | `None` |
-| `[[Note\|Alias]]` | `Note` | `Alias` | `None` | `None` |
-| `[[Folder/Note#Heading]]` | `Folder/Note` | `None` | `Heading` | `None` |
-| `[[Note^abc123]]` | `Note` | `None` | `None` | `abc123` |
-| `[[Note#Section^block\|Display]]` | `Note` | `Display` | `Section` | `block` |
-| `![[Embedded]]` | `Embedded` | `None` | `None` | `None` |
+| Input                             | `target`      | `alias`   | `heading` | `blockid` |
+| --------------------------------- | ------------- | --------- | --------- | --------- |
+| `[[Note]]`                        | `Note`        | `None`    | `None`    | `None`    |
+| `[[Note\|Alias]]`                 | `Note`        | `Alias`   | `None`    | `None`    |
+| `[[Folder/Note#Heading]]`         | `Folder/Note` | `None`    | `Heading` | `None`    |
+| `[[Note^abc123]]`                 | `Note`        | `None`    | `None`    | `abc123`  |
+| `[[Note#Section^block\|Display]]` | `Note`        | `Display` | `Section` | `block`   |
+| `![[Embedded]]`                   | `Embedded`    | `None`    | `None`    | `None`    |
 
 ### Markdown links
 
 For Markdown links, `heading` and `blockid` are always `None`. The `target` is the URL or path inside parentheses, and `alias` is the link text inside brackets.
 
-| Input | `target` | `alias` | `heading` | `blockid` |
-|---|---|---|---|---|
-| `[Docs](https://example.com)` | `https://example.com` | `Docs` | `None` | `None` |
-| `![Logo](assets/logo.png)` | `assets/logo.png` | `Logo` | `None` | `None` |
-| `[](relative/path.md)` | `relative/path.md` | `None` | `None` | `None` |
+| Input                         | `target`              | `alias` | `heading` | `blockid` |
+| ----------------------------- | --------------------- | ------- | --------- | --------- |
+| `[Docs](https://example.com)` | `https://example.com` | `Docs`  | `None`    | `None`    |
+| `![Logo](assets/logo.png)`    | `assets/logo.png`     | `Logo`  | `None`    | `None`    |
+| `[](relative/path.md)`        | `relative/path.md`    | `None`  | `None`    | `None`    |
 
 ## Development
 
